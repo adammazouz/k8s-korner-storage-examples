@@ -1,0 +1,54 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: persistent-volume
+spec:
+  storageClassName: local
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+    - ReadWriteMany
+  hostPath:
+    path: /etc/foo
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc
+spec:
+  storageClassName: local
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: busybox
+  name: persistent-volume-pod
+spec:
+
+  volumes:
+  - name:  vol01 
+    persistentVolumeClaim:
+      claimName: pvc
+
+  containers:
+  - args:
+    - /bin/sh
+    - -c
+    - sleep 3600
+    image: busybox
+    imagePullPolicy: IfNotPresent
+    name: busybox
+    resources: {}
+
+    volumeMounts:
+    - name: vol01 
+      mountPath: /etc/foo
